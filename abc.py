@@ -2,6 +2,7 @@ import random
 import pygame
 
 pygame.init()
+pygame.mixer.init()  # Initialize mixer for sound
 
 class Button:
     def __init__(self, x, y, image):
@@ -16,6 +17,7 @@ class Button:
 
 class RPSGame:
     def __init__(self):
+        # Screen setup
         self.screen = pygame.display.set_mode((960, 640))
         pygame.display.set_caption("Rock Paper Scissors")
 
@@ -24,32 +26,39 @@ class RPSGame:
         self.r_btn_img = pygame.image.load("r_button.png").convert_alpha()
         self.p_btn_img = pygame.image.load("p_button.png").convert_alpha()
         self.s_btn_img = pygame.image.load("s_button.png").convert_alpha()
-
         self.choose_rock = pygame.image.load("rock.png").convert_alpha()
         self.choose_paper = pygame.image.load("paper.png").convert_alpha()
         self.choose_scissors = pygame.image.load("scissors.png").convert_alpha()
 
-        # Create button objects with image sizes
+        # Buttons
         self.rock_button = Button(20, 500, self.r_btn_img)
         self.paper_button = Button(330, 500, self.p_btn_img)
         self.scissors_button = Button(640, 500, self.s_btn_img)
 
+        # Font & scores
         self.font = pygame.font.Font(None, 60)
         self.player_option = None
         self.pc_random_choice = None
         self.player_score = 0
         self.pc_score = 0
 
+        # Draw initial screen
         self.draw_buttons()
         self.draw_scores()
         pygame.display.update()
 
+        # ---------- Background Music ----------
+        pygame.mixer.music.load("Minecraft.mp3")  # <-- Your music file
+        pygame.mixer.music.play(-1)  # -1 = loop indefinitely
+
+    # ---------- Draw Buttons ----------
     def draw_buttons(self):
         self.screen.blit(self.bg, (0, 0))
         self.screen.blit(self.r_btn_img, (self.rock_button.x, self.rock_button.y))
         self.screen.blit(self.p_btn_img, (self.paper_button.x, self.paper_button.y))
         self.screen.blit(self.s_btn_img, (self.scissors_button.x, self.scissors_button.y))
 
+    # ---------- Player Choice ----------
     def player_choice(self, pos):
         if self.rock_button.clicked(pos):
             self.player_option = 'rock'
@@ -60,10 +69,9 @@ class RPSGame:
         elif self.scissors_button.clicked(pos):
             self.player_option = 'scissors'
             self.screen.blit(self.choose_scissors, (120, 200))
-        # Debug click
-        print(f"Player chose: {self.player_option}")
         return self.player_option
 
+    # ---------- Computer Choice ----------
     def computer_choice(self):
         self.pc_random_choice = random.choice(['rock', 'paper', 'scissors'])
         if self.pc_random_choice == 'rock':
@@ -73,6 +81,7 @@ class RPSGame:
         else:
             self.screen.blit(self.choose_scissors, (600, 200))
 
+    # ---------- Check Winner ----------
     def check_winner(self):
         pl = self.player_option
         pc = self.pc_random_choice
@@ -89,12 +98,14 @@ class RPSGame:
             self.pc_score += 1
             return "Computer Wins!"
 
+    # ---------- Draw Scores ----------
     def draw_scores(self):
         player_text = self.font.render(f"Player: {self.player_score}", True, (255, 255, 255))
         pc_text = self.font.render(f"Computer: {self.pc_score}", True, (255, 255, 255))
         self.screen.blit(player_text, (50, 50))
         self.screen.blit(pc_text, (650, 50))
 
+    # ---------- Main Game Loop ----------
     def run(self):
         running = True
         while running:
@@ -104,7 +115,6 @@ class RPSGame:
                     running = False
                 elif event.type == pygame.MOUSEBUTTONDOWN:
                     pos = pygame.mouse.get_pos()
-                    # Draw buttons first
                     self.draw_buttons()
                     self.player_choice(pos)
                     self.computer_choice()
